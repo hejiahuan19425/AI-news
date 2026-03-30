@@ -50,12 +50,19 @@ export async function getArticles(search?: string, filter?: string): Promise<Art
   return (data ?? []) as Article[];
 }
 
+// 返回北京时间的 YYYY-MM-DD 字符串
+function toBeijingDateStr(date: Date): string {
+  const bjOffset = 8 * 60; // UTC+8，单位分钟
+  const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
+  const bjDate = new Date(utcMs + bjOffset * 60000);
+  return `${bjDate.getFullYear()}-${bjDate.getMonth() + 1}-${bjDate.getDate()}`;
+}
+
 export function groupArticlesByDate(articles: Article[]): ArticlesByDate[] {
   const now = new Date();
-  const todayStr = now.toDateString();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toDateString();
+  const todayStr = toBeijingDateStr(now);
+  const yesterday = new Date(now.getTime() - 86400000);
+  const yesterdayStr = toBeijingDateStr(yesterday);
 
   const groups: Map<string, { label: string; articles: Article[] }> = new Map();
 
@@ -63,7 +70,7 @@ export function groupArticlesByDate(articles: Article[]): ArticlesByDate[] {
     const date = article.published_at
       ? new Date(article.published_at)
       : new Date(article.created_at);
-    const dateStr = date.toDateString();
+    const dateStr = toBeijingDateStr(date);
 
     let label: string;
     if (dateStr === todayStr) {
@@ -71,7 +78,10 @@ export function groupArticlesByDate(articles: Article[]): ArticlesByDate[] {
     } else if (dateStr === yesterdayStr) {
       label = "昨天";
     } else {
-      label = `${date.getMonth() + 1}月${date.getDate()}日`;
+      const bjOffset = 8 * 60;
+      const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
+      const bjDate = new Date(utcMs + bjOffset * 60000);
+      label = `${bjDate.getMonth() + 1}月${bjDate.getDate()}日`;
     }
 
     if (!groups.has(dateStr)) {

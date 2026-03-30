@@ -34,6 +34,11 @@ export default async function HomePage({ searchParams }: Props) {
             每日精选 AI 故事
           </span>
         </div>
+        <div className="max-w-2xl mx-auto px-4 pb-1">
+          <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
+            聚合全球信源，用中文讲 AI 故事
+          </p>
+        </div>
         <div className="max-w-2xl mx-auto px-4 pb-3">
           <FilterBar currentSearch={q} currentFilter={filter} />
         </div>

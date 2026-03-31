@@ -21,8 +21,10 @@ const SOURCE_COLORS: Record<string, string> = {
 function formatTime(dateStr: string | null): string {
   if (!dateStr) return "";
   const date = new Date(dateStr);
-  const hours = date.getHours().toString().padStart(2, "0");
-  const mins = date.getMinutes().toString().padStart(2, "0");
+  const bjMs = date.getTime() + (date.getTimezoneOffset() + 8 * 60) * 60000;
+  const bj = new Date(bjMs);
+  const hours = bj.getHours().toString().padStart(2, "0");
+  const mins = bj.getMinutes().toString().padStart(2, "0");
   return `${hours}:${mins}`;
 }
 

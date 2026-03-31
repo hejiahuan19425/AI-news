@@ -76,9 +76,11 @@ async function fetchJsonXSource(
   const data = await res.json();
 
   const newArticles: RawArticle[] = [];
+  const cutoff = Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000;
   for (const builder of data.x ?? []) {
     for (const tweet of builder.tweets ?? []) {
       if (!tweet.url || existingUrls.has(tweet.url)) continue;
+      if (tweet.createdAt && new Date(tweet.createdAt).getTime() < cutoff) continue;
       const isViral = (tweet.likes ?? 0) > 500;
       newArticles.push({
         sourceId: source.id,
@@ -96,6 +98,7 @@ async function fetchJsonXSource(
 }
 
 const MAX_PER_SOURCE = 10;
+const LOOKBACK_HOURS = 48;
 
 async function fetchSingleSource(
   source: Source,
@@ -103,11 +106,15 @@ async function fetchSingleSource(
 ): Promise<RawArticle[]> {
   const feed = await parser.parseURL(source.url);
   const newArticles: RawArticle[] = [];
+  const cutoff = Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000;
 
   for (const item of feed.items) {
     if (newArticles.length >= MAX_PER_SOURCE) break;
     const url = item.link;
     if (!url || existingUrls.has(url)) continue;
+
+    const pubDate = item.isoDate || item.pubDate;
+    if (pubDate && new Date(pubDate).getTime() < cutoff) continue;
 
     newArticles.push({
       sourceId: source.id,
@@ -115,7 +122,7 @@ async function fetchSingleSource(
       titleOriginal: item.title || "",
       contentSnippet: item.contentSnippet || item.content || item.summary || "",
       originalUrl: url,
-      publishedAt: item.isoDate || item.pubDate || null,
+      publishedAt: pubDate || null,
     });
   }
 

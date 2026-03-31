@@ -136,6 +136,13 @@ const seedSources: Source[] = [
     type: "rss",
     url: "https://rsshub.app/thepaper/channel/25950",
   },
+
+  // ===== X / Twitter（via follow-builders 聚合 feed）=====
+  {
+    name: "Follow Builders X Feed",
+    type: "twitter",
+    url: "https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-x.json",
+  },
 ];
 
 async function seed() {

@@ -26,12 +26,12 @@ interface Source {
 }
 
 export async function fetchAllSources(): Promise<RawArticle[]> {
-  // 1. 从 Supabase 读取所有启用的 RSS 信源
+  // 1. 从 Supabase 读取所有启用的信源（RSS + JSON）
   const { data: sources, error } = await supabase
     .from("sources")
     .select("id, name, type, url")
     .eq("enabled", true)
-    .eq("type", "rss");
+    .in("type", ["rss", "twitter"]);
 
   if (error) {
     console.error("Failed to fetch sources:", error.message);
@@ -52,7 +52,10 @@ export async function fetchAllSources(): Promise<RawArticle[]> {
 
   for (const source of sources as Source[]) {
     try {
-      const articles = await fetchSingleSource(source, existingUrls);
+      const articles =
+        source.url.endsWith(".json")
+          ? await fetchJsonXSource(source, existingUrls)
+          : await fetchSingleSource(source, existingUrls);
       allNewArticles.push(...articles);
       console.log(`✓ ${source.name}: ${articles.length} new articles`);
     } catch (err) {
@@ -62,6 +65,31 @@ export async function fetchAllSources(): Promise<RawArticle[]> {
 
   console.log(`\nTotal new articles: ${allNewArticles.length}`);
   return allNewArticles;
+}
+
+async function fetchJsonXSource(
+  source: Source,
+  existingUrls: Set<string>
+): Promise<RawArticle[]> {
+  const res = await fetch(source.url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+
+  const newArticles: RawArticle[] = [];
+  for (const builder of data.x ?? []) {
+    for (const tweet of builder.tweets ?? []) {
+      if (!tweet.url || existingUrls.has(tweet.url)) continue;
+      newArticles.push({
+        sourceId: source.id,
+        sourceName: `${builder.name} (@${builder.handle})`,
+        titleOriginal: tweet.text,
+        contentSnippet: tweet.text,
+        originalUrl: tweet.url,
+        publishedAt: tweet.createdAt ?? null,
+      });
+    }
+  }
+  return newArticles;
 }
 
 async function fetchSingleSource(

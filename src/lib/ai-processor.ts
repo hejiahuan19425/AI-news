@@ -25,6 +25,8 @@ const OFFICIAL_SOURCES = new Set([
   "Anthropic Blog",
   "OpenAI Blog",
   "Google AI Blog",
+  "Claude (@claudeai)",
+  "Sam Altman (@sama)",
 ]);
 
 const SYSTEM_PROMPT = `你是一个专业的 AI 新闻编辑，负责筛选并处理与 AI 相关的新闻。

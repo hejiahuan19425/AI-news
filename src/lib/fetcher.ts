@@ -79,11 +79,14 @@ async function fetchJsonXSource(
   for (const builder of data.x ?? []) {
     for (const tweet of builder.tweets ?? []) {
       if (!tweet.url || existingUrls.has(tweet.url)) continue;
+      const isViral = (tweet.likes ?? 0) > 500;
       newArticles.push({
         sourceId: source.id,
         sourceName: `${builder.name} (@${builder.handle})`,
         titleOriginal: tweet.text,
-        contentSnippet: tweet.text,
+        contentSnippet: isViral
+          ? `${tweet.text}\n\n[热度：${tweet.likes} 赞 / ${tweet.retweets} 转发，属于高热度内容]`
+          : tweet.text,
         originalUrl: tweet.url,
         publishedAt: tweet.createdAt ?? null,
       });

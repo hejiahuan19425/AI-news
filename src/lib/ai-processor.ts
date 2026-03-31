@@ -20,6 +20,13 @@ interface ProcessedArticle {
   tags: string[];
 }
 
+// 这些信源的文章跳过 is_story 过滤，只要 is_ai_related 就保存
+const OFFICIAL_SOURCES = new Set([
+  "Anthropic Blog",
+  "OpenAI Blog",
+  "Google AI Blog",
+]);
+
 const SYSTEM_PROMPT = `你是一个专业的 AI 新闻编辑，负责筛选并处理与 AI 相关的新闻。
 请严格按照 JSON 格式返回结果，不要添加任何其他文字。`;
 
@@ -32,7 +39,7 @@ const USER_PROMPT_TEMPLATE = (title: string, snippet: string) => `
 请返回以下 JSON 结构（不要包含任何其他文字，只返回 JSON）：
 {
   "is_ai_related": true/false,     // 是否与 AI 相关（包括人工智能、机器学习、大模型、自动化等）
-  "is_story": true/false,          // 是否是普通人感兴趣的故事（非纯技术公告/招聘/财报等）
+  "is_story": true/false,          // 是否值得读者关注。以下情况应为 true：新模型/产品发布、研究报告、重大政策、行业事件、有影响力的人物观点。以下情况为 false：招聘广告、纯财报数据、无实质内容的简短公告
   "title_zh": "中文标题",           // 简洁的中文标题（如不相关或非故事，填空字符串）
   "summary_zh": "中文摘要",         // 2-3句话的中文摘要（如不相关或非故事，填空字符串）
   "detail_what": "发生了什么",      // 事件描述（如不相关或非故事，填空字符串）
@@ -84,7 +91,8 @@ export async function processArticles(rawArticles: RawArticle[]): Promise<void> 
     try {
       const result = await callAI(article.titleOriginal, article.contentSnippet);
 
-      if (!result || !result.is_ai_related || !result.is_story) {
+      const isOfficial = OFFICIAL_SOURCES.has(article.sourceName);
+      if (!result || !result.is_ai_related || (!result.is_story && !isOfficial)) {
         console.log(`  ✗ skip [not AI/story]: ${article.titleOriginal.slice(0, 60)}`);
         skipped++;
         continue;

@@ -92,6 +92,8 @@ async function fetchJsonXSource(
   return newArticles;
 }
 
+const MAX_PER_SOURCE = 10;
+
 async function fetchSingleSource(
   source: Source,
   existingUrls: Set<string>
@@ -100,6 +102,7 @@ async function fetchSingleSource(
   const newArticles: RawArticle[] = [];
 
   for (const item of feed.items) {
+    if (newArticles.length >= MAX_PER_SOURCE) break;
     const url = item.link;
     if (!url || existingUrls.has(url)) continue;
 

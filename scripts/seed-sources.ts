@@ -107,7 +107,7 @@ const seedSources: Source[] = [
   {
     name: "Anthropic Blog",
     type: "rss",
-    url: "https://www.anthropic.com/rss.xml",
+    url: "https://news.google.com/rss/search?q=anthropic+claude&hl=en-US&gl=US&ceid=US:en",
   },
   {
     name: "Google AI Blog",

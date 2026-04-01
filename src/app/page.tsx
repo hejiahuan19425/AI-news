@@ -1,16 +1,11 @@
 import { getArticles, groupArticlesByDate } from "@/lib/articles";
 import ArticleCard from "@/components/ArticleCard";
-import FilterBar from "@/components/FilterBar";
+import ContactButton from "@/components/ContactButton";
 
 export const revalidate = 300; // 5分钟缓存
 
-interface Props {
-  searchParams: Promise<{ q?: string; filter?: string }>;
-}
-
-export default async function HomePage({ searchParams }: Props) {
-  const { q, filter } = await searchParams;
-  const articles = await getArticles(q, filter);
+export default async function HomePage() {
+  const articles = await getArticles();
   const groups = groupArticlesByDate(articles);
 
   return (
@@ -30,17 +25,7 @@ export default async function HomePage({ searchParams }: Props) {
           >
             AI 观察
           </h1>
-          <span className="text-sm" style={{ color: "var(--muted)" }}>
-            每日精选 AI 故事
-          </span>
-        </div>
-        <div className="max-w-2xl mx-auto px-4 pb-1">
-          <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
-            聚合全球信源，用中文讲 AI 故事
-          </p>
-        </div>
-        <div className="max-w-2xl mx-auto px-4 pb-3">
-          <FilterBar currentSearch={q} currentFilter={filter} />
+          <ContactButton />
         </div>
       </header>
 
@@ -48,7 +33,7 @@ export default async function HomePage({ searchParams }: Props) {
       <main className="max-w-2xl mx-auto px-4 py-6">
         {groups.length === 0 ? (
           <div className="text-center py-20" style={{ color: "var(--muted)" }}>
-            {q ? `没有找到"${q}"相关的文章` : "暂无文章，请稍后再来"}
+            暂无文章，请稍后再来
           </div>
         ) : (
           groups.map((group) => (
@@ -68,6 +53,8 @@ export default async function HomePage({ searchParams }: Props) {
           ))
         )}
       </main>
+
+
     </div>
   );
 }

@@ -25,6 +25,25 @@ export interface ArticlesByDate {
   articles: Article[];
 }
 
+function titleSimilarity(a: string, b: string): number {
+  const tokenize = (s: string) =>
+    s.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, " ").split(/\s+/).filter((w) => w.length > 1);
+  const wordsA = new Set(tokenize(a));
+  const wordsB = new Set(tokenize(b));
+  const intersection = [...wordsA].filter((w) => wordsB.has(w)).length;
+  const union = new Set([...wordsA, ...wordsB]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
+function deduplicateByTitle(articles: Article[]): Article[] {
+  const kept: Article[] = [];
+  for (const article of articles) {
+    const isDuplicate = kept.some((k) => titleSimilarity(k.title_zh, article.title_zh) > 0.5);
+    if (!isDuplicate) kept.push(article);
+  }
+  return kept;
+}
+
 export async function getArticles(search?: string, filter?: string): Promise<Article[]> {
   let query = supabase
     .from("articles")
@@ -47,7 +66,7 @@ export async function getArticles(search?: string, filter?: string): Promise<Art
     return [];
   }
 
-  return (data ?? []) as Article[];
+  return deduplicateByTitle((data ?? []) as Article[]);
 }
 
 // 返回北京时间的 YYYY-MM-DD 字符串

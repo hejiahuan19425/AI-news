@@ -137,6 +137,28 @@ const seedSources: Source[] = [
     url: "https://rsshub.app/thepaper/channel/25950",
   },
 
+  // ===== 推荐信源 =====
+  {
+    name: "AI Valley",
+    type: "rss",
+    url: "https://news.google.com/rss/search?q=site:theaivalley.com&hl=en-US&gl=US&ceid=US:en",
+  },
+  {
+    name: "Every.to",
+    type: "rss",
+    url: "https://news.google.com/rss/search?q=site:every.to+AI&hl=en-US&gl=US&ceid=US:en",
+  },
+  {
+    name: "Google The Keyword",
+    type: "rss",
+    url: "https://blog.google/rss/",
+  },
+  {
+    name: "AI News (smol.ai)",
+    type: "rss",
+    url: "https://ainews.smol.ai/rss.xml",
+  },
+
   // ===== X / Twitter（via follow-builders 聚合 feed）=====
   {
     name: "Follow Builders X Feed",

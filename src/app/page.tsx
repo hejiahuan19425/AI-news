@@ -1,6 +1,5 @@
 import { getArticles, groupArticlesByDate } from "@/lib/articles";
 import ArticleCard from "@/components/ArticleCard";
-import ContactButton from "@/components/ContactButton";
 
 export const revalidate = 300; // 5分钟缓存
 
@@ -25,7 +24,6 @@ export default async function HomePage() {
           >
             AI 观察
           </h1>
-          <ContactButton />
         </div>
       </header>
 

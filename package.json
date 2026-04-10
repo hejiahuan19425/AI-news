@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "push-feishu": "tsx scripts/push-to-feishu.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",

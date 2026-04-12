@@ -2,8 +2,8 @@ name: Fetch News
 
 on:
   schedule:
-    - cron: '0 4,16 * * *'  # 北京时间 12:00 和 00:00 各一次
-  workflow_dispatch:          # 允许手动触发
+    - cron: '0 0,5,13 * * *'  # 北京时间 08:00、13:00、21:00
+  workflow_dispatch:            # 允许手动触发
 
 jobs:
   fetch:

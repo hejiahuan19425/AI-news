@@ -82,14 +82,16 @@ async function callAI(title: string, snippet: string): Promise<ProcessedArticle 
   return JSON.parse(content) as ProcessedArticle;
 }
 
+const CONCURRENCY = 5;
+
 export async function processArticles(rawArticles: RawArticle[]): Promise<void> {
-  console.log(`\nProcessing ${rawArticles.length} articles with AI...`);
+  console.log(`\nProcessing ${rawArticles.length} articles with AI (concurrency=${CONCURRENCY})...`);
 
   let saved = 0;
   let skipped = 0;
   let failed = 0;
 
-  for (const article of rawArticles) {
+  const processOne = async (article: RawArticle) => {
     try {
       const result = await callAI(article.titleOriginal, article.contentSnippet);
 
@@ -97,7 +99,7 @@ export async function processArticles(rawArticles: RawArticle[]): Promise<void> 
       if (!result || !result.is_ai_related || (!result.is_story && !isOfficial)) {
         console.log(`  ✗ skip [not AI/story]: ${article.titleOriginal.slice(0, 60)}`);
         skipped++;
-        continue;
+        return;
       }
 
       const { error } = await supabase.from("articles").insert({
@@ -124,6 +126,11 @@ export async function processArticles(rawArticles: RawArticle[]): Promise<void> 
       console.error(`  ✗ failed: ${article.titleOriginal.slice(0, 60)}\n    ${(err as Error).message}`);
       failed++;
     }
+  };
+
+  // 分批并发处理
+  for (let i = 0; i < rawArticles.length; i += CONCURRENCY) {
+    await Promise.all(rawArticles.slice(i, i + CONCURRENCY).map(processOne));
   }
 
   console.log(`\nDone — saved: ${saved}, skipped: ${skipped}, failed: ${failed}`);

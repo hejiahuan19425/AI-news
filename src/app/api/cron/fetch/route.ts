@@ -10,9 +10,8 @@ export async function GET(request: Request) {
 
   try {
     const rawArticles = await fetchAllSources();
-    const batch = rawArticles.slice(0, 15);
-    await processArticles(batch);
-    return NextResponse.json({ ok: true, total: rawArticles.length, processed: batch.length });
+    await processArticles(rawArticles);
+    return NextResponse.json({ ok: true, count: rawArticles.length });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
